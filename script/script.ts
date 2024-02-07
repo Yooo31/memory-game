@@ -1,22 +1,22 @@
 //? Fonction qui créé une carte
 
-function createCard(CardUrl : string, index : number) : HTMLDivElement {
-    console.log(index);
-    const card = document.createElement('div');
-    card.classList.add('card');
-    card.dataset.value = index.toString();
+function createCard(CardUrl: string, index: number): HTMLDivElement {
+  console.log(index);
+  const card = document.createElement('div');
+  card.classList.add('card');
+  card.dataset.value = index.toString();
 
-    const cardContent = document.createElement('img');
-    cardContent.classList.add('card-content');
-    cardContent.src = CardUrl;
-    card.appendChild(cardContent);
+  const cardContent = document.createElement('img');
+  cardContent.classList.add('card-content');
+  cardContent.src = CardUrl;
+  card.appendChild(cardContent);
 
-    return card;
+  return card;
 }
 
 //? Initialisation des cartes
 
-const cards : string[] = [
+const cards: string[] = [
   'src/image1.png',
   'src/image2.png',
   'src/image3.png',
@@ -29,8 +29,8 @@ const cards : string[] = [
 
 //? Fonction pour la duplication du tableau
 
-function duplicateArray(simpleArray : string[]) : string[] {
-  let doubleArray : string[] = [];
+function duplicateArray(simpleArray: string[]): string[] {
+  let doubleArray: string[] = [];
 
   doubleArray.push(...simpleArray);
   doubleArray.push(...simpleArray);
@@ -40,15 +40,15 @@ function duplicateArray(simpleArray : string[]) : string[] {
 
 //? Fonction pour mélanger les cartes
 
-function shuffleArray(array : string[]) : string[] {
-    const arrayShuffled : string[] = array.sort(() => 0.5 - Math.random());
+function shuffleArray(array: string[]): string[] {
+  const arrayShuffled: string[] = array.sort(() => 0.5 - Math.random());
 
-    return arrayShuffled;
+  return arrayShuffled;
 }
 
 //? Fonction pour changer la vue des cartes
 
-function changeCardView(elementClicked : string) {
+function changeCardView(elementClicked: string) {
   const card = document.querySelector(`[data-value="${elementClicked}"]`);
   const cardContent = card?.querySelector('.card-content') as HTMLImageElement | null;
 
@@ -57,23 +57,44 @@ function changeCardView(elementClicked : string) {
   }
 }
 
+//? Retourner les cartes lors de l'erreur
+
+function resetCards() {
+  choice.forEach((card) => {
+    const cardElement = document.querySelector(`[data-value="${card}"]`);
+    const cardContent = cardElement?.querySelector('.card-content') as HTMLImageElement | null;
+
+    if (cardContent) {
+      cardContent.src = 'src/image.png';
+    }
+  })
+}
+
 //? Vérification de la correspondace des cartes
 
 function checkCorrepondence() {
-  console.log(choice)
-  if (choice[0] === choice[1]) {
-    alert('Bravo');
+  if (allCards[parseInt(choice[0])] === allCards[parseInt(choice[1])]) {
+    score++;
   } else {
-    alert('Dommage');
+    resetCards();
   }
+
+  choice = [];
 }
 
 //! Déroulement du jeu
 
+//? Score
+
+let score: number = 0;
+
 //? Création du tableau  final
 
-let allCards : string[] = duplicateArray(cards);
-let choice : string[] = [];
+let allCards: string[] = duplicateArray(cards);
+
+//? Choix de l'utilisateur
+
+let choice: string[] = [];
 
 // allCards = shuffleArray(allCards);
 const gameBoard = document.getElementById('game-board')!;
@@ -96,10 +117,12 @@ if (cardElements) {
       //? Vérification de victoire
 
       if (dataValue) {
-        choice.push(allCards[parseInt(dataValue)]);
+        choice.push(dataValue);
         changeCardView(dataValue);
 
-        choice.length === 2 && checkCorrepondence();
+        setTimeout(() => {
+          choice.length === 2 && checkCorrepondence();
+      }, 1500);
       }
     });
   });

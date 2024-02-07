@@ -41,18 +41,32 @@ function changeCardView(elementClicked) {
         cardContent.src = allCards[parseInt(elementClicked)];
     }
 }
-function checkCorrepondance() {
-    console.log(choice);
-    if (choice[0] === choice[1]) {
-        alert('Bravo');
+//? Retourner les cartes lors de l'erreur
+function resetCards() {
+    choice.forEach(function (card) {
+        var cardElement = document.querySelector("[data-value=\"".concat(card, "\"]"));
+        var cardContent = cardElement === null || cardElement === void 0 ? void 0 : cardElement.querySelector('.card-content');
+        if (cardContent) {
+            cardContent.src = 'src/image.png';
+        }
+    });
+}
+//? Vérification de la correspondace des cartes
+function checkCorrepondence() {
+    if (allCards[parseInt(choice[0])] === allCards[parseInt(choice[1])]) {
+        score++;
     }
     else {
-        alert('Dommage');
+        resetCards();
     }
+    choice = [];
 }
 //! Déroulement du jeu
+//? Score
+var score = 0;
 //? Création du tableau  final
 var allCards = duplicateArray(cards);
+//? Choix de l'utilisateur
 var choice = [];
 // allCards = shuffleArray(allCards);
 var gameBoard = document.getElementById('game-board');
@@ -67,10 +81,13 @@ if (cardElements) {
     cardElements.forEach(function (cardElement) {
         cardElement.addEventListener('click', function () {
             var dataValue = cardElement.getAttribute('data-value');
+            //? Vérification de victoire
             if (dataValue) {
-                choice.push(allCards[parseInt(dataValue)]);
+                choice.push(dataValue);
                 changeCardView(dataValue);
-                choice.length === 2 && checkCorrepondance();
+                setTimeout(function () {
+                    choice.length === 2 && checkCorrepondence();
+                }, 1500);
             }
         });
     });
