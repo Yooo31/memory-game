@@ -1,3 +1,4 @@
+//? Fonction qui créé une carte
 function createCard(CardUrl, index) {
     console.log(index);
     var card = document.createElement('div');
@@ -9,16 +10,7 @@ function createCard(CardUrl, index) {
     card.appendChild(cardContent);
     return card;
 }
-function duplicateArray(simpleArray) {
-    var doubleArray = [];
-    doubleArray.push.apply(doubleArray, simpleArray);
-    doubleArray.push.apply(doubleArray, simpleArray);
-    return doubleArray;
-}
-function shuffleArray(array) {
-    var arrayShuffled = array.sort(function () { return 0.5 - Math.random(); });
-    return arrayShuffled;
-}
+//? Initialisation des cartes
 var cards = [
     'src/image1.png',
     'src/image2.png',
@@ -29,13 +21,19 @@ var cards = [
     'src/image7.png',
     'src/image8.png'
 ];
-var allCards = duplicateArray(cards);
-allCards = shuffleArray(allCards);
-var gameBoard = document.getElementById('game-board');
-allCards.forEach(function (card, index) {
-    var cardElement = createCard('src/image.png', index);
-    gameBoard.appendChild(cardElement);
-});
+//? Fonction pour la duplication du tableau
+function duplicateArray(simpleArray) {
+    var doubleArray = [];
+    doubleArray.push.apply(doubleArray, simpleArray);
+    doubleArray.push.apply(doubleArray, simpleArray);
+    return doubleArray;
+}
+//? Fonction pour mélanger les cartes
+function shuffleArray(array) {
+    var arrayShuffled = array.sort(function () { return 0.5 - Math.random(); });
+    return arrayShuffled;
+}
+//? Fonction pour changer la vue des cartes
 function changeCardView(elementClicked) {
     var card = document.querySelector("[data-value=\"".concat(elementClicked, "\"]"));
     var cardContent = card === null || card === void 0 ? void 0 : card.querySelector('.card-content');
@@ -43,13 +41,36 @@ function changeCardView(elementClicked) {
         cardContent.src = allCards[parseInt(elementClicked)];
     }
 }
+function checkCorrepondance() {
+    console.log(choice);
+    if (choice[0] === choice[1]) {
+        alert('Bravo');
+    }
+    else {
+        alert('Dommage');
+    }
+}
+//! Déroulement du jeu
+//? Création du tableau  final
+var allCards = duplicateArray(cards);
+var choice = [];
+// allCards = shuffleArray(allCards);
+var gameBoard = document.getElementById('game-board');
+//? Affichage des cartes
+allCards.forEach(function (card, index) {
+    var cardElement = createCard('src/image.png', index);
+    gameBoard.appendChild(cardElement);
+});
+//? Ajout de l'event listener pour le click sur une carte
 var cardElements = document.querySelectorAll('.card');
 if (cardElements) {
     cardElements.forEach(function (cardElement) {
         cardElement.addEventListener('click', function () {
             var dataValue = cardElement.getAttribute('data-value');
             if (dataValue) {
+                choice.push(allCards[parseInt(dataValue)]);
                 changeCardView(dataValue);
+                choice.length === 2 && checkCorrepondance();
             }
         });
     });
