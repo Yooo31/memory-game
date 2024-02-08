@@ -75,11 +75,21 @@ function resetCards() {
 function checkCorrepondence() {
   if (allCards[parseInt(choice[0])] === allCards[parseInt(choice[1])]) {
     score++;
+
+    score === 8 && endGame();
   } else {
     resetCards();
   }
 
   choice = [];
+  gameBoard.classList.remove('click-disabled');
+}
+
+function endGame() {
+  gameBoard.classList.add('d-none');
+
+  const endBoard = document.getElementById('game-end')!;
+  endBoard.classList.remove('d-none');
 }
 
 //! Déroulement du jeu
@@ -96,7 +106,7 @@ let allCards: string[] = duplicateArray(cards);
 
 let choice: string[] = [];
 
-// allCards = shuffleArray(allCards);
+//! allCards = shuffleArray(allCards);
 const gameBoard = document.getElementById('game-board')!;
 
 //? Affichage des cartes
@@ -120,9 +130,13 @@ if (cardElements) {
         choice.push(dataValue);
         changeCardView(dataValue);
 
-        setTimeout(() => {
-          choice.length === 2 && checkCorrepondence();
-      }, 1500);
+        if (choice.length === 2) {
+          gameBoard.classList.add('click-disabled');
+
+          setTimeout(() => {
+            checkCorrepondence();
+          }, 1000);
+        }
       }
     });
   });
