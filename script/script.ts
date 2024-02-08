@@ -70,12 +70,53 @@ class GamePoints {
   }
 }
 
+class Timer {
+  private intervalId: number = 0;
+  private startTime: number = 0;
+  private elapsedTime: number = 0;
+  private running: boolean = false;
+
+  start() {
+    if (!this.running) {
+      this.startTime = Date.now() - this.elapsedTime;
+      this.intervalId = window.setInterval(() => {
+        this.elapsedTime = Date.now() - this.startTime;
+        this.updateTimeDisplay();
+      }, 1000);
+      this.running = true;
+    }
+  }
+
+  stop() {
+    if (this.running) {
+      clearInterval(this.intervalId);
+      this.running = false;
+    }
+  }
+
+  reset() {
+    this.elapsedTime = 0;
+    this.updateTimeDisplay();
+  }
+
+  private updateTimeDisplay() {
+    const timerElement = document.getElementById("timer");
+    if (timerElement) {
+      const minutes = Math.floor(this.elapsedTime / 60000);
+      const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
+      timerElement.textContent = `Time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+  }
+}
+
 class Game {
   cards: string[];
   score: number;
   choice: string[];
   gameBoard: HTMLElement;
   allCards: string[];
+  gameIsStarted: boolean;
+  private timer : Timer;
 
   constructor(cards: string[]) {
     this.cards = cards;
@@ -83,6 +124,8 @@ class Game {
     this.choice = [];
     this.gameBoard = document.getElementById('game-board')!;
     this.allCards = this.getFinalArray(cards);
+    this.gameIsStarted = false;
+    this.timer = new Timer();
   }
 
   getFinalArray(simpleArray: string[]): string[] {
@@ -95,7 +138,10 @@ class Game {
       this.score++;
       GamePoints.updateScoreDisplay(this.score);
 
-      this.score === 8 && GameManager.endGame(this.gameBoard);
+      if (this.score === 8) {
+        GameManager.endGame(this.gameBoard);
+        this.timer.stop();
+      }
     } else {
       GameManager.resetCards(this.choice);
     }
@@ -105,6 +151,7 @@ class Game {
   }
 
   initGame() {
+    this.timer.reset();
     this.allCards.forEach((card, index) => {
       const cardElement = GameManager.createCard('src/image.png', index);
       this.gameBoard.appendChild(cardElement);
@@ -114,6 +161,11 @@ class Game {
     if (cardElements) {
       cardElements.forEach((cardElement: HTMLElement) => {
         cardElement.addEventListener('click', () => {
+          if (!this.gameIsStarted) {
+            this.timer.start();
+            this.gameIsStarted = true;
+          }
+
           const dataValue: string | null = cardElement.getAttribute('data-value');
 
           if (dataValue) {

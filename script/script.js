@@ -55,10 +55,48 @@ var GamePoints = /** @class */ (function () {
     GamePoints.updateScoreDisplay = function (score) {
         var scoreElement = document.getElementById('points');
         if (scoreElement) {
-            scoreElement.textContent = "Score: ".concat(score);
+            scoreElement.textContent = "".concat(score);
         }
     };
     return GamePoints;
+}());
+var Timer = /** @class */ (function () {
+    function Timer() {
+        this.intervalId = 0;
+        this.startTime = 0;
+        this.elapsedTime = 0;
+        this.running = false;
+    }
+    Timer.prototype.start = function () {
+        var _this = this;
+        if (!this.running) {
+            this.startTime = Date.now() - this.elapsedTime;
+            this.intervalId = window.setInterval(function () {
+                _this.elapsedTime = Date.now() - _this.startTime;
+                _this.updateTimeDisplay();
+            }, 1000);
+            this.running = true;
+        }
+    };
+    Timer.prototype.stop = function () {
+        if (this.running) {
+            clearInterval(this.intervalId);
+            this.running = false;
+        }
+    };
+    Timer.prototype.reset = function () {
+        this.elapsedTime = 0;
+        this.updateTimeDisplay();
+    };
+    Timer.prototype.updateTimeDisplay = function () {
+        var timerElement = document.getElementById("timer");
+        if (timerElement) {
+            var minutes = Math.floor(this.elapsedTime / 60000);
+            var seconds = Math.floor((this.elapsedTime % 60000) / 1000);
+            timerElement.textContent = "Time: ".concat(minutes.toString().padStart(2, '0'), ":").concat(seconds.toString().padStart(2, '0'));
+        }
+    };
+    return Timer;
 }());
 var Game = /** @class */ (function () {
     function Game(cards) {
@@ -67,6 +105,8 @@ var Game = /** @class */ (function () {
         this.choice = [];
         this.gameBoard = document.getElementById('game-board');
         this.allCards = this.getFinalArray(cards);
+        this.gameIsStarted = false;
+        this.timer = new Timer();
     }
     Game.prototype.getFinalArray = function (simpleArray) {
         var completeArray = GameManager.duplicateArray(simpleArray);
@@ -76,7 +116,10 @@ var Game = /** @class */ (function () {
         if (this.allCards[parseInt(this.choice[0])] === this.allCards[parseInt(this.choice[1])]) {
             this.score++;
             GamePoints.updateScoreDisplay(this.score);
-            this.score === 8 && GameManager.endGame(this.gameBoard);
+            if (this.score === 8) {
+                GameManager.endGame(this.gameBoard);
+                this.timer.stop();
+            }
         }
         else {
             GameManager.resetCards(this.choice);
@@ -86,6 +129,7 @@ var Game = /** @class */ (function () {
     };
     Game.prototype.initGame = function () {
         var _this = this;
+        this.timer.reset();
         this.allCards.forEach(function (card, index) {
             var cardElement = GameManager.createCard('src/image.png', index);
             _this.gameBoard.appendChild(cardElement);
@@ -94,6 +138,10 @@ var Game = /** @class */ (function () {
         if (cardElements) {
             cardElements.forEach(function (cardElement) {
                 cardElement.addEventListener('click', function () {
+                    if (!_this.gameIsStarted) {
+                        _this.timer.start();
+                        _this.gameIsStarted = true;
+                    }
                     var dataValue = cardElement.getAttribute('data-value');
                     if (dataValue) {
                         _this.choice.push(dataValue);
