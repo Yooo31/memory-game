@@ -1,16 +1,116 @@
-//? Fonction qui créé une carte
-function createCard(CardUrl, index) {
-    console.log(index);
-    var card = document.createElement('div');
-    card.classList.add('card');
-    card.dataset.value = index.toString();
-    var cardContent = document.createElement('img');
-    cardContent.classList.add('card-content');
-    cardContent.src = CardUrl;
-    card.appendChild(cardContent);
-    return card;
-}
-//? Initialisation des cartes
+var GameManager = /** @class */ (function () {
+    function GameManager() {
+    }
+    GameManager.duplicateArray = function (array) {
+        var doubleArray = [];
+        doubleArray.push.apply(doubleArray, array);
+        doubleArray.push.apply(doubleArray, array);
+        return doubleArray;
+    };
+    GameManager.shuffleArray = function (array) {
+        return array.sort(function () { return 0.5 - Math.random(); });
+    };
+    GameManager.createCard = function (CardUrl, index) {
+        var card = document.createElement('div');
+        card.classList.add('card');
+        card.dataset.value = index.toString();
+        var cardContent = document.createElement('img');
+        cardContent.classList.add('card-content');
+        cardContent.src = CardUrl;
+        card.appendChild(cardContent);
+        return card;
+    };
+    GameManager.changeCardView = function (elementClicked, allCards) {
+        var card = document.querySelector("[data-value=\"".concat(elementClicked, "\"]"));
+        var cardContent = card === null || card === void 0 ? void 0 : card.querySelector('.card-content');
+        if (cardContent) {
+            cardContent.src = allCards[parseInt(elementClicked)];
+        }
+    };
+    GameManager.resetCards = function (choice) {
+        choice.forEach(function (card) {
+            var cardElement = document.querySelector("[data-value=\"".concat(card, "\"]"));
+            var cardContent = cardElement === null || cardElement === void 0 ? void 0 : cardElement.querySelector('.card-content');
+            if (cardContent) {
+                cardContent.src = 'src/image.png';
+            }
+        });
+    };
+    GameManager.endGame = function (gameBoard) {
+        gameBoard.classList.add('d-none');
+        var endBoard = document.getElementById('game-end');
+        endBoard.classList.remove('d-none');
+    };
+    GameManager.blockClick = function (gameBoard) {
+        gameBoard.classList.add('click-disabled');
+    };
+    GameManager.enableClick = function (gameBoard) {
+        gameBoard.classList.remove('click-disabled');
+    };
+    return GameManager;
+}());
+var GamePoints = /** @class */ (function () {
+    function GamePoints() {
+    }
+    GamePoints.updateScoreDisplay = function (score) {
+        var scoreElement = document.getElementById('points');
+        if (scoreElement) {
+            scoreElement.textContent = "Score: ".concat(score);
+        }
+    };
+    return GamePoints;
+}());
+var Game = /** @class */ (function () {
+    function Game(cards) {
+        this.cards = cards;
+        this.score = 0;
+        this.choice = [];
+        this.gameBoard = document.getElementById('game-board');
+        this.allCards = this.getFinalArray(cards);
+    }
+    Game.prototype.getFinalArray = function (simpleArray) {
+        var completeArray = GameManager.duplicateArray(simpleArray);
+        return GameManager.shuffleArray(completeArray);
+    };
+    Game.prototype.checkCorrepondence = function () {
+        if (this.allCards[parseInt(this.choice[0])] === this.allCards[parseInt(this.choice[1])]) {
+            this.score++;
+            GamePoints.updateScoreDisplay(this.score);
+            this.score === 8 && GameManager.endGame(this.gameBoard);
+        }
+        else {
+            GameManager.resetCards(this.choice);
+        }
+        this.choice = [];
+        GameManager.enableClick(this.gameBoard);
+    };
+    Game.prototype.initGame = function () {
+        var _this = this;
+        this.allCards.forEach(function (card, index) {
+            var cardElement = GameManager.createCard('src/image.png', index);
+            _this.gameBoard.appendChild(cardElement);
+        });
+        var cardElements = document.querySelectorAll('.card');
+        if (cardElements) {
+            cardElements.forEach(function (cardElement) {
+                cardElement.addEventListener('click', function () {
+                    var dataValue = cardElement.getAttribute('data-value');
+                    if (dataValue) {
+                        _this.choice.push(dataValue);
+                        GameManager.changeCardView(dataValue, _this.allCards);
+                        if (_this.choice.length === 2) {
+                            GameManager.blockClick(_this.gameBoard);
+                            setTimeout(function () {
+                                _this.checkCorrepondence();
+                            }, 1000);
+                        }
+                    }
+                });
+            });
+        }
+    };
+    return Game;
+}());
 var cards = [
     'src/image1.png',
     'src/image2.png',
@@ -21,84 +121,5 @@ var cards = [
     'src/image7.png',
     'src/image8.png'
 ];
-//? Fonction pour la duplication du tableau
-function duplicateArray(simpleArray) {
-    var doubleArray = [];
-    doubleArray.push.apply(doubleArray, simpleArray);
-    doubleArray.push.apply(doubleArray, simpleArray);
-    return doubleArray;
-}
-//? Fonction pour mélanger les cartes
-function shuffleArray(array) {
-    var arrayShuffled = array.sort(function () { return 0.5 - Math.random(); });
-    return arrayShuffled;
-}
-//? Fonction pour changer la vue des cartes
-function changeCardView(elementClicked) {
-    var card = document.querySelector("[data-value=\"".concat(elementClicked, "\"]"));
-    var cardContent = card === null || card === void 0 ? void 0 : card.querySelector('.card-content');
-    if (cardContent) {
-        cardContent.src = allCards[parseInt(elementClicked)];
-    }
-}
-//? Retourner les cartes lors de l'erreur
-function resetCards() {
-    choice.forEach(function (card) {
-        var cardElement = document.querySelector("[data-value=\"".concat(card, "\"]"));
-        var cardContent = cardElement === null || cardElement === void 0 ? void 0 : cardElement.querySelector('.card-content');
-        if (cardContent) {
-            cardContent.src = 'src/image.png';
-        }
-    });
-}
-//? Vérification de la correspondace des cartes
-function checkCorrepondence() {
-    if (allCards[parseInt(choice[0])] === allCards[parseInt(choice[1])]) {
-        score++;
-        score === 8 && endGame();
-    }
-    else {
-        resetCards();
-    }
-    choice = [];
-    gameBoard.classList.remove('click-disabled');
-}
-function endGame() {
-    gameBoard.classList.add('d-none');
-    var endBoard = document.getElementById('game-end');
-    endBoard.classList.remove('d-none');
-}
-//! Déroulement du jeu
-//? Score
-var score = 0;
-//? Création du tableau  final
-var allCards = duplicateArray(cards);
-//? Choix de l'utilisateur
-var choice = [];
-//! allCards = shuffleArray(allCards);
-var gameBoard = document.getElementById('game-board');
-//? Affichage des cartes
-allCards.forEach(function (card, index) {
-    var cardElement = createCard('src/image.png', index);
-    gameBoard.appendChild(cardElement);
-});
-//? Ajout de l'event listener pour le click sur une carte
-var cardElements = document.querySelectorAll('.card');
-if (cardElements) {
-    cardElements.forEach(function (cardElement) {
-        cardElement.addEventListener('click', function () {
-            var dataValue = cardElement.getAttribute('data-value');
-            //? Vérification de victoire
-            if (dataValue) {
-                choice.push(dataValue);
-                changeCardView(dataValue);
-                if (choice.length === 2) {
-                    gameBoard.classList.add('click-disabled');
-                    setTimeout(function () {
-                        checkCorrepondence();
-                    }, 1000);
-                }
-            }
-        });
-    });
-}
+var game = new Game(cards);
+game.initGame();
