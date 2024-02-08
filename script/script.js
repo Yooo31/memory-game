@@ -93,7 +93,7 @@ var Timer = /** @class */ (function () {
         if (timerElement) {
             var minutes = Math.floor(this.elapsedTime / 60000);
             var seconds = Math.floor((this.elapsedTime % 60000) / 1000);
-            timerElement.textContent = "Time: ".concat(minutes.toString().padStart(2, '0'), ":").concat(seconds.toString().padStart(2, '0'));
+            timerElement.textContent = "".concat(minutes.toString().padStart(2, '0'), ":").concat(seconds.toString().padStart(2, '0'));
         }
     };
     return Timer;

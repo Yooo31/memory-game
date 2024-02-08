@@ -104,7 +104,7 @@ class Timer {
     if (timerElement) {
       const minutes = Math.floor(this.elapsedTime / 60000);
       const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
-      timerElement.textContent = `Time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
   }
 }

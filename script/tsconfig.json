@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "lib": [
+      "es6",
+      "es2017.string",
+      "dom",
+      "scripthost"
+    ]
+  },
+  "include": [
+    "script.ts"
+  ]
+}
